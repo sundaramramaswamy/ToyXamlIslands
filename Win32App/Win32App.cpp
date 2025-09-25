@@ -7,7 +7,7 @@
 #include <stdexcept>
 #include <cstdio>
 
-HWND InitializeWindow(HINSTANCE hInst, unsigned int nWidth, unsigned int nHeight);
+HWND InitializeWindow(HINSTANCE hInst, LONG nWidth, LONG nHeight);
 LRESULT WINAPI WndProc(HWND, UINT, WPARAM, LPARAM);
 
 int WINAPI wWinMain(_In_ HINSTANCE hInstance,
@@ -23,8 +23,8 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
     winrt::init_apartment(winrt::apartment_type::single_threaded);
 
     HWND hWnd = InitializeWindow(hInstance,
-        static_cast<unsigned>(Application::kWindowWidth),
-        static_cast<unsigned>(Application::kWindowHeight));
+        static_cast<LONG>(Application::kWindowSize.x),
+        static_cast<LONG>(Application::kWindowSize.y));
 
     ShowWindow(hWnd, SW_SHOW);
     UpdateWindow(hWnd);
@@ -52,7 +52,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
     return 0;
 }
 
-HWND InitializeWindow(HINSTANCE hInst, unsigned int nWidth, unsigned int nHeight)
+HWND InitializeWindow(HINSTANCE hInst, LONG nWidth, LONG nHeight)
 {
     WNDCLASSEX wc = { sizeof(wc) };
     wc.style = CS_HREDRAW | CS_VREDRAW;
@@ -67,15 +67,19 @@ HWND InitializeWindow(HINSTANCE hInst, unsigned int nWidth, unsigned int nHeight
     if (!RegisterClassEx(&wc))
         throw std::runtime_error("Failed to register class: Win32App");
 
+    const auto dwStyle = WS_OVERLAPPEDWINDOW;
+    RECT windowRect = { 0, 0, nWidth, nHeight };
+    AdjustWindowRectEx(&windowRect, dwStyle, FALSE, 0);
+
     // https://learn.microsoft.com/en-us/windows/win32/winmsg/extended-window-styles
     HWND hWindow = CreateWindowEx(WS_EX_NOREDIRECTIONBITMAP,
         wc.lpszClassName,
         L"Hello, Islands!",
-        WS_OVERLAPPEDWINDOW,
+        dwStyle,
         CW_USEDEFAULT,
         CW_USEDEFAULT,
-        nWidth,
-        nHeight,
+        windowRect.right - windowRect.left,
+        windowRect.bottom - windowRect.top,
         nullptr,
         nullptr,
         hInst,

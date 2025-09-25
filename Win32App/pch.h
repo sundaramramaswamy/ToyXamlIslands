@@ -52,4 +52,5 @@ namespace winrt
     namespace Controls = winrt::Microsoft::UI::Xaml::Controls;
 
     namespace Text = winrt::Windows::UI::Text;
+    namespace Numerics = winrt::Windows::Foundation::Numerics;
 }
