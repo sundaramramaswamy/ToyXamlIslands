@@ -21,10 +21,9 @@ private:
     winrt::MUC::Compositor m_compositor = winrt::MUC::Compositor{};
     winrt::MUCn::DesktopAttachedSiteBridge m_bridge{ nullptr };
     winrt::MUCn::ContentIsland m_islandParent{ nullptr };
-    winrt::MUCn::ContentIsland m_islandChild{ nullptr };
+    winrt::Xaml::XamlIsland m_islandXaml{ nullptr };
     winrt::MUCn::ChildSiteLink m_childSiteLink{ nullptr };
     winrt::com_ptr<winrt::Win32App::implementation::App> m_app{ nullptr };
 
     winrt::MUC::ContainerVisual m_visualParent{ nullptr };
-    winrt::MUC::ContainerVisual m_visualChild{ nullptr };
 };
