@@ -57,9 +57,8 @@ void Application::Initialize(HWND hWnd) {
     m_islandXaml.Content(CreateXamlTree());
 
     // Create bridge to host parent island and connect.
-    m_bridge = DesktopAttachedSiteBridge::CreateFromWindowId(
-        m_compositor.DispatcherQueue(),
-        winrt::Microsoft::UI::GetWindowIdFromWindow(hWnd));
+    auto windowId = winrt::Microsoft::UI::GetWindowIdFromWindow(hWnd);
+    m_bridge = DesktopAttachedSiteBridge::CreateFromWindowId(m_compositor.DispatcherQueue(), windowId);
     m_bridge.OverrideScale(1.0f);
     m_bridge.Connect(m_islandParent);
 
@@ -75,4 +74,6 @@ void Application::Initialize(HWND hWnd) {
     m_childSiteLink.ActualSize(m_visualChild.Size());
 #endif // !ABSOLUTE_SIZES
     m_childSiteLink.LocalToParentTransformMatrix(m_islandXaml.Content().TransformMatrix());
+
+    WINRT_ASSERT(m_islandXaml.ContentIsland().Environment().AppWindowId() == windowId);
 }
