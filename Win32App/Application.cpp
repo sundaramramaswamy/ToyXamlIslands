@@ -51,6 +51,12 @@ void Application::Initialize(HWND hWnd) {
     m_visualParent.Children().InsertAtTop(parentFill);
     m_islandParent = winrt::MUCn::ContentIsland::Create(m_visualParent);
 
+    // Create a parent visual for Xaml
+    auto xamlVisual = m_compositor.CreateSpriteVisual();
+    xamlVisual.Brush(m_compositor.CreateColorBrush(Colors::Teal()));
+    xamlVisual.RelativeSizeAdjustment({ 1.0f, 0.5f });
+    m_visualParent.Children().InsertAtTop(xamlVisual);
+
     // Create child Xaml island.
     winrt::make<winrt::Win32App::implementation::App>().as(m_app);
     m_islandXaml = winrt::Xaml::XamlIsland();
@@ -63,13 +69,13 @@ void Application::Initialize(HWND hWnd) {
     m_bridge.Connect(m_islandParent);
 
     // Create child site link in parent at one of its visuals and connect child.
-    m_childSiteLink = winrt::MUCn::ChildSiteLink::Create(m_islandParent, parentFill);
+    m_childSiteLink = winrt::MUCn::ChildSiteLink::Create(m_islandParent, xamlVisual);
     m_childSiteLink.Connect(m_islandXaml.ContentIsland());
 
     // Set link's properties.
     // This is an important for the child island to show up with a non-zero size.
 #ifndef ABSOLUTE_SIZES
-    m_childSiteLink.ActualSize(kWindowSize);
+    m_childSiteLink.ActualSize({ kWindowSize.x, kWindowSize.y * 0.5f });
 #else
     m_childSiteLink.ActualSize(m_visualChild.Size());
 #endif // !ABSOLUTE_SIZES
