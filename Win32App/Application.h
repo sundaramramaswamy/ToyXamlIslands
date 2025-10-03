@@ -22,7 +22,9 @@ private:
     winrt::MUCn::DesktopAttachedSiteBridge m_bridge{ nullptr };
     winrt::MUCn::ContentIsland m_islandParent{ nullptr };
     winrt::Xaml::XamlIsland m_islandXaml{ nullptr };
-    winrt::MUCn::ChildSiteLink m_childSiteLink{ nullptr };
+    winrt::Xaml::XamlIsland m_islandWv2{ nullptr };
+    winrt::MUCn::ChildSiteLink m_xamlSiteLink{ nullptr };
+    winrt::MUCn::ChildSiteLink m_wv2SiteLink{ nullptr };
     winrt::com_ptr<winrt::Win32App::implementation::App> m_app{ nullptr };
 
     winrt::MUC::ContainerVisual m_visualParent{ nullptr };
