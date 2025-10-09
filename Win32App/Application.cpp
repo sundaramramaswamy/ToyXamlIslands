@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Application.h"
 
-using winrt::MUCn::DesktopAttachedSiteBridge;
+using winrt::MUCn::DesktopChildSiteBridge;
 using winrt::MU::ColorHelper;
 using winrt::MU::Colors;
 
@@ -70,9 +70,13 @@ void Application::Initialize(HWND hWnd) {
 
     // Create bridge to host parent island and connect.
     auto windowId = winrt::Microsoft::UI::GetWindowIdFromWindow(hWnd);
-    m_bridge = DesktopAttachedSiteBridge::CreateFromWindowId(m_compositor.DispatcherQueue(), windowId);
+    m_bridge = DesktopChildSiteBridge::Create(m_compositor, windowId);
     m_bridge.OverrideScale(1.0f);
     m_bridge.Connect(m_islandParent);
+    m_bridge.MoveAndResize({ 0, 0,
+        static_cast<int>(kWindowSize.x),
+        static_cast<int>(kWindowSize.y) });
+    m_bridge.Show();
 
     // Create child site link in parent for Xaml at one of its visuals and connect to island.
     m_xamlSiteLink = winrt::MUCn::ChildSiteLink::Create(m_islandParent, xamlVisual);
