@@ -15,6 +15,17 @@ public:
 
     static constexpr winrt::Numerics::float2 kWindowSize = { 800.0f, 600.0f };
 
+    ~Application() {
+        if (m_bridge)
+            m_bridge.Close();
+    }
+
+    // Non-copyable, immovable, non-assignable.
+    Application(const Application&) = delete;
+    Application(Application&&) = delete;
+    Application& operator=(const Application&) = delete;
+    Application& operator=(Application&&) = delete;
+
 private:
     Application() = default;
 

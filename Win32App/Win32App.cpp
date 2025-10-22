@@ -30,7 +30,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
     UpdateWindow(hWnd);
 
     auto dispatcherQueueController = winrt::MUD::DispatcherQueueController::CreateOnCurrentThread();
-    auto app = Application::GetInstance();
+    Application& app = Application::GetInstance();
     app.Initialize(hWnd);
 
 #ifdef USER32_LOOP_INTEROP
