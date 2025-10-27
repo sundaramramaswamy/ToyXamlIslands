@@ -42,41 +42,48 @@ void Application::Initialize(HWND hWnd) {
     if (m_bridge)
         throw std::runtime_error("Application is already initialized.");
 
-    // Create parent {visual filled red, island}.
+    // Create a root container visual.
+    m_visualParent = m_compositor.CreateContainerVisual();
+    m_visualParent.RelativeSizeAdjustment({ 1.0f, 1.0f });
+    // Create a sprite visual to paint root container in red.
     auto parentFill = m_compositor.CreateSpriteVisual();
     parentFill.Brush(m_compositor.CreateColorBrush(Colors::Red()));
     parentFill.RelativeSizeAdjustment({ 1.0f, 1.0f });
-    m_visualParent = m_compositor.CreateContainerVisual();
-    m_visualParent.RelativeSizeAdjustment({ 1.0f, 1.0f });
+    // Add sprite to container visual.
     m_visualParent.Children().InsertAtTop(parentFill);
+    // Create parent island at root visual's bounds.  This visual is the root
+    // for island's visual tree.
     m_islandParent = winrt::MUCn::ContentIsland::Create(m_visualParent);
 
-    // Create a parent visual for Xaml
+    // Create bridge to host parent island and connect.
+    auto windowId = winrt::Microsoft::UI::GetWindowIdFromWindow(hWnd);
+    m_bridge = DesktopChildSiteBridge::Create(m_compositor, windowId);
+    m_bridge.OverrideScale(1.0f);
+    // Auto-resize visual tree on WM_SIZE events.
+    m_bridge.ResizePolicy(winrt::MUCn::ContentSizePolicy::ResizeContentToParentWindow);
+    m_bridge.Connect(m_islandParent);
+    m_bridge.MoveAndResize({ 0, 0,
+        static_cast<int>(kWindowSize.x),
+        static_cast<int>(kWindowSize.y) });
+    m_bridge.Show();
+
+    // Create a visual to host Xaml island.  Add it to root container visual.
     auto xamlVisual = m_compositor.CreateSpriteVisual();
     xamlVisual.Brush(m_compositor.CreateColorBrush(Colors::Teal()));
     xamlVisual.RelativeSizeAdjustment({ 1.0f, 0.5f });
     m_visualParent.Children().InsertAtTop(xamlVisual);
 
+    // Create a visual to host WV2 island.  Add it to root container visual.
     auto wv2Visual = m_compositor.CreateSpriteVisual();
-    wv2Visual.Brush(m_compositor.CreateColorBrush(Colors::Aqua()));
+    wv2Visual.Brush(m_compositor.CreateColorBrush(Colors::Yellow()));
     wv2Visual.RelativeSizeAdjustment({ 1.0f, 0.5f });
-    wv2Visual.Offset({ 0.0f, kWindowSize.y * 0.5f, 0.0f });
+    wv2Visual.RelativeOffsetAdjustment({ 0.0f, 0.5f, 0.0f });
     m_visualParent.Children().InsertAtTop(wv2Visual);
 
     // Create child Xaml island.
     winrt::make<winrt::Win32App::implementation::App>().as(m_app);
     m_islandXaml = winrt::Xaml::XamlIsland();
     m_islandXaml.Content(CreateXamlTree());
-
-    // Create bridge to host parent island and connect.
-    auto windowId = winrt::Microsoft::UI::GetWindowIdFromWindow(hWnd);
-    m_bridge = DesktopChildSiteBridge::Create(m_compositor, windowId);
-    m_bridge.OverrideScale(1.0f);
-    m_bridge.Connect(m_islandParent);
-    m_bridge.MoveAndResize({ 0, 0,
-        static_cast<int>(kWindowSize.x),
-        static_cast<int>(kWindowSize.y) });
-    m_bridge.Show();
 
     // Create child site link in parent for Xaml at one of its visuals and connect to island.
     m_xamlSiteLink = winrt::MUCn::ChildSiteLink::Create(m_islandParent, xamlVisual);
@@ -87,12 +94,13 @@ void Application::Initialize(HWND hWnd) {
 #ifndef ABSOLUTE_SIZES
     m_xamlSiteLink.ActualSize({ kWindowSize.x, kWindowSize.y * 0.5f });
 #else
-    m_childSiteLink.ActualSize(m_visualChild.Size());
+    m_xamlSiteLink.ActualSize(m_visualXaml.Size());
 #endif // !ABSOLUTE_SIZES
     m_xamlSiteLink.LocalToParentTransformMatrix(m_islandXaml.Content().TransformMatrix());
 
     WINRT_ASSERT(m_islandXaml.ContentIsland().Environment().AppWindowId() == windowId);
 
+    // Create a child WebView2 island.
     auto webView = winrt::Controls::WebView2();
     winrt::Windows::Foundation::Uri uri{ L"http://www.bing.com" };
     webView.Source(uri);
