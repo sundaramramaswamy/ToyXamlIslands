@@ -55,6 +55,21 @@ void Application::Initialize(HWND hWnd) {
     // for island's visual tree.
     m_islandParent = winrt::MUCn::ContentIsland::Create(m_visualParent);
 
+    m_islandParent.StateChanged([&](const auto&,
+        const winrt::MUCn::ContentIslandStateChangedEventArgs& args) {
+            if (args.DidActualSizeChange()) {
+                const auto islandSize = m_islandParent.ActualSize();
+                const winrt::Numerics::float2 innerIslandSize = { islandSize.x, islandSize.y * 0.5f };
+                // Setting these properties are important for the child island to show up with a
+                // non-zero size both during init and later resizes.
+                m_xamlSiteLink.LocalToParentTransformMatrix(m_islandXaml.Content().TransformMatrix());
+                m_xamlSiteLink.ActualSize(innerIslandSize);
+
+                m_wv2SiteLink.LocalToParentTransformMatrix(m_islandWv2.Content().TransformMatrix());
+                m_wv2SiteLink.ActualSize(innerIslandSize);
+            }
+        });
+
     // Create bridge to host parent island and connect.
     auto windowId = winrt::Microsoft::UI::GetWindowIdFromWindow(hWnd);
     m_bridge = DesktopChildSiteBridge::Create(m_compositor, windowId);
@@ -89,15 +104,6 @@ void Application::Initialize(HWND hWnd) {
     m_xamlSiteLink = winrt::MUCn::ChildSiteLink::Create(m_islandParent, xamlVisual);
     m_xamlSiteLink.Connect(m_islandXaml.ContentIsland());
 
-    // Set link's properties.
-    // This is an important for the child island to show up with a non-zero size.
-#ifndef ABSOLUTE_SIZES
-    m_xamlSiteLink.ActualSize({ kWindowSize.x, kWindowSize.y * 0.5f });
-#else
-    m_xamlSiteLink.ActualSize(m_visualXaml.Size());
-#endif // !ABSOLUTE_SIZES
-    m_xamlSiteLink.LocalToParentTransformMatrix(m_islandXaml.Content().TransformMatrix());
-
     WINRT_ASSERT(m_islandXaml.ContentIsland().Environment().AppWindowId() == windowId);
 
     // Create a child WebView2 island.
@@ -110,6 +116,4 @@ void Application::Initialize(HWND hWnd) {
     // Create child site link in parent for WebView2 at one of its visuals and connect to island.
     m_wv2SiteLink = winrt::MUCn::ChildSiteLink::Create(m_islandParent, wv2Visual);
     m_wv2SiteLink.Connect(m_islandWv2.ContentIsland());
-    m_wv2SiteLink.ActualSize({ kWindowSize.x, kWindowSize.y * 0.5f });
-    m_wv2SiteLink.LocalToParentTransformMatrix(m_islandWv2.Content().TransformMatrix());
 }
