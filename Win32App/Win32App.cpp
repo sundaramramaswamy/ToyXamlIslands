@@ -26,12 +26,12 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance,
         static_cast<LONG>(Application::kWindowSize.x),
         static_cast<LONG>(Application::kWindowSize.y));
 
-    ShowWindow(hWnd, SW_SHOW);
-    UpdateWindow(hWnd);
-
     auto dispatcherQueueController = winrt::MUD::DispatcherQueueController::CreateOnCurrentThread();
     Application& app = Application::GetInstance();
     app.Initialize(hWnd);
+
+    ShowWindow(hWnd, SW_SHOW);
+    UpdateWindow(hWnd);
 
 #ifdef USER32_LOOP_INTEROP
     MSG msg{};
