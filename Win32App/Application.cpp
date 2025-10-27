@@ -10,25 +10,35 @@ namespace {
     winrt::Xaml::UIElement CreateXamlTree()
     {
         // Create a Xaml container and the control that goes into it.
-        winrt::Controls::StackPanel container;
+        winrt::Controls::Grid container;
         container.Background(winrt::Xaml::Media::SolidColorBrush(Colors::LightBlue()));
-        winrt::Controls::TextBox textBox;
-        textBox.PlaceholderText(L"Go on, enter something...");
-        textBox.Width(550);
-        textBox.FontStyle(winrt::Text::FontStyle::Italic);
-        textBox.VerticalAlignment(winrt::Xaml::VerticalAlignment::Center);
-        textBox.HorizontalAlignment(winrt::Xaml::HorizontalAlignment::Center);
-        textBox.FontSize(48);
+        winrt::Controls::ColumnDefinition c1, c2;
+        // Use 1:3 ratio for text block:text box.
+        c1.Width(winrt::Xaml::GridLengthHelper::FromValueAndType(1.0, winrt::Xaml::GridUnitType::Star));
+        c2.Width(winrt::Xaml::GridLengthHelper::FromValueAndType(3.0, winrt::Xaml::GridUnitType::Star));
+        container.ColumnDefinitions().Append(c1);
+        container.ColumnDefinitions().Append(c2);
+
         winrt::Controls::TextBlock textBlock;
         textBlock.Text(L"Input");
         textBlock.VerticalAlignment(winrt::Xaml::VerticalAlignment::Center);
-        textBlock.HorizontalAlignment(winrt::Xaml::HorizontalAlignment::Center);
+        textBlock.HorizontalAlignment(winrt::Xaml::HorizontalAlignment::Left);
         textBlock.FontSize(48);
         const auto orange = ColorHelper::FromArgb(0xff, 0xff, 0xa5, 0x00);
         textBlock.Foreground(winrt::Xaml::Media::SolidColorBrush(orange));
-        winrt::Xaml::Thickness textBlockMargin{ 10.0, 0, 10.0 };
-        textBlock.Margin(textBlockMargin);
-        container.Orientation(winrt::Xaml::Controls::Orientation::Horizontal);
+        winrt::Xaml::Thickness controlMargin{ 10.0, 0, 10.0 };
+        textBlock.Margin(controlMargin);
+        container.SetColumn(textBlock, 0);
+
+        winrt::Controls::TextBox textBox;
+        textBox.PlaceholderText(L"Go on, enter something...");
+        textBox.FontStyle(winrt::Text::FontStyle::Italic);
+        textBox.VerticalAlignment(winrt::Xaml::VerticalAlignment::Center);
+        textBox.HorizontalAlignment(winrt::Xaml::HorizontalAlignment::Stretch);
+        textBox.FontSize(48);
+        textBox.Margin(controlMargin);
+        container.SetColumn(textBox, 1);
+
         container.Children().Append(textBlock);
         container.Children().Append(textBox);
         container.UpdateLayout();
