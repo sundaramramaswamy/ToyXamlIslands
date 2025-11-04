@@ -18,6 +18,21 @@ namespace {
         c2.Width(winrt::Xaml::GridLengthHelper::FromValueAndType(3.0, winrt::Xaml::GridUnitType::Star));
         container.ColumnDefinitions().Append(c1);
         container.ColumnDefinitions().Append(c2);
+        container.RowDefinitions().Append({});
+        container.RowDefinitions().Append({});
+
+        winrt::Controls::Button button;
+        button.Content(winrt::box_value(L"Popup"));
+        button.FontSize(48);
+        button.Click([](const auto&, const winrt::Xaml::RoutedEventArgs&) {
+            auto& app = Application::GetInstance();
+            if (!app.isPopupShowing())
+                app.showPopup();
+            else
+                app.dismissPopup();
+            });
+        container.SetRow(button, 0);
+        container.SetColumn(button, 1);
 
         winrt::Controls::TextBlock textBlock;
         textBlock.Text(L"Input");
@@ -28,6 +43,7 @@ namespace {
         textBlock.Foreground(winrt::Xaml::Media::SolidColorBrush(orange));
         winrt::Xaml::Thickness controlMargin{ 10.0, 0, 10.0 };
         textBlock.Margin(controlMargin);
+        container.SetRow(textBlock, 1);
         container.SetColumn(textBlock, 0);
 
         winrt::Controls::TextBox textBox;
@@ -37,8 +53,10 @@ namespace {
         textBox.HorizontalAlignment(winrt::Xaml::HorizontalAlignment::Stretch);
         textBox.FontSize(48);
         textBox.Margin(controlMargin);
+        container.SetRow(textBox, 1);
         container.SetColumn(textBox, 1);
 
+        container.Children().Append(button);
         container.Children().Append(textBlock);
         container.Children().Append(textBox);
         container.UpdateLayout();
@@ -72,10 +90,11 @@ void Application::Initialize(HWND hWnd) {
                 const winrt::Numerics::float2 innerIslandSize = { islandSize.x, islandSize.y * 0.5f };
                 // Setting these properties are important for the child island to show up with a
                 // non-zero size both during init and later resizes.
-                m_xamlSiteLink.LocalToParentTransformMatrix(m_islandXaml.Content().TransformMatrix());
+                m_xamlSiteLink.LocalToParentTransformMatrix(winrt::Numerics::float4x4::identity());
                 m_xamlSiteLink.ActualSize(innerIslandSize);
 
-                m_wv2SiteLink.LocalToParentTransformMatrix(m_islandWv2.Content().TransformMatrix());
+                m_wv2SiteLink.LocalToParentTransformMatrix(
+                    winrt::Numerics::make_float4x4_translation({ 0.0f, islandSize.y * 0.5f, 0.0f }));
                 m_wv2SiteLink.ActualSize(innerIslandSize);
             }
         });
@@ -126,4 +145,42 @@ void Application::Initialize(HWND hWnd) {
     // Create child site link in parent for WebView2 at one of its visuals and connect to island.
     m_wv2SiteLink = winrt::MUCn::ChildSiteLink::Create(m_islandParent, wv2Visual);
     m_wv2SiteLink.Connect(m_islandWv2.ContentIsland());
+}
+
+void Application::showPopup() {
+    assert(m_bridge);
+    if (m_bridgePopup) {
+        OutputDebugStringA("showPopup: Ignoring request as popup already showing up.");
+        return;
+    }
+    auto fill = m_compositor.CreateSpriteVisual();
+    fill.Brush(m_compositor.CreateColorBrush(Colors::Orange()));
+    fill.RelativeSizeAdjustment({ 1.0f, 1.0f });
+    auto popupIsland = winrt::MUCn::ContentIsland::Create(fill);
+    m_bridgePopup = winrt::MUCn::DesktopPopupSiteBridge::Create(m_islandParent);
+    m_bridgePopup.Connect(popupIsland);
+
+#ifndef POPUP_PARENT_IS_WEBVIEW
+    const auto parentView = m_bridge.SiteView();
+#else
+    const auto parentView = m_wv2SiteLink.SiteView();
+#endif // POPUP_PARENT_IS_WEBVIEW
+    const auto parentSize = parentView.ActualSize();
+    const auto convertor = parentView.CoordinateConverter();
+    m_bridgePopup.MoveAndResize(convertor.ConvertLocalToScreen({
+        parentSize.x * 0.25f,  // Offset
+        parentSize.y * 0.25f,
+        parentSize.x * 0.5f,   // Size
+        parentSize.y * 0.5f
+    }));
+    m_bridgePopup.Show();
+}
+
+void Application::dismissPopup() {
+    if (m_bridgePopup && m_bridgePopup.IsVisible()) {
+        // Hide and close as close doesn't call hide and we continue to see a popup!
+        m_bridgePopup.Hide();
+        m_bridgePopup.Close();
+        m_bridgePopup = nullptr;
+    }
 }
