@@ -71,17 +71,17 @@ void Application::Initialize(HWND hWnd) {
         throw std::runtime_error("Application is already initialized.");
 
     // Create a root container visual.
-    m_visualParent = m_compositor.CreateContainerVisual();
-    m_visualParent.RelativeSizeAdjustment({ 1.0f, 1.0f });
+    winrt::MUC::ContainerVisual visualParent = m_compositor.CreateContainerVisual();
+    visualParent.RelativeSizeAdjustment({ 1.0f, 1.0f });
     // Create a sprite visual to paint root container in red.
     auto parentFill = m_compositor.CreateSpriteVisual();
     parentFill.Brush(m_compositor.CreateColorBrush(Colors::Red()));
     parentFill.RelativeSizeAdjustment({ 1.0f, 1.0f });
     // Add sprite to container visual.
-    m_visualParent.Children().InsertAtTop(parentFill);
+    visualParent.Children().InsertAtTop(parentFill);
     // Create parent island at root visual's bounds.  This visual is the root
     // for island's visual tree.
-    m_islandParent = winrt::MUCn::ContentIsland::Create(m_visualParent);
+    m_islandParent = winrt::MUCn::ContentIsland::Create(visualParent);
 
     m_islandParent.StateChanged([&](const auto&,
         const winrt::MUCn::ContentIslandStateChangedEventArgs& args) {
@@ -90,12 +90,12 @@ void Application::Initialize(HWND hWnd) {
                 const winrt::Numerics::float2 innerIslandSize = { islandSize.x, islandSize.y * 0.5f };
                 // Setting these properties are important for the child island to show up with a
                 // non-zero size both during init and later resizes.
-                m_xamlSiteLink.LocalToParentTransformMatrix(winrt::Numerics::float4x4::identity());
-                m_xamlSiteLink.ActualSize(innerIslandSize);
+                m_siteXaml.LocalToParentTransformMatrix(winrt::Numerics::float4x4::identity());
+                m_siteXaml.ActualSize(innerIslandSize);
 
-                m_wv2SiteLink.LocalToParentTransformMatrix(
+                m_siteWv2.LocalToParentTransformMatrix(
                     winrt::Numerics::make_float4x4_translation({ 0.0f, islandSize.y * 0.5f, 0.0f }));
-                m_wv2SiteLink.ActualSize(innerIslandSize);
+                m_siteWv2.ActualSize(innerIslandSize);
             }
         });
 
@@ -115,14 +115,14 @@ void Application::Initialize(HWND hWnd) {
     auto xamlVisual = m_compositor.CreateSpriteVisual();
     xamlVisual.Brush(m_compositor.CreateColorBrush(Colors::Teal()));
     xamlVisual.RelativeSizeAdjustment({ 1.0f, 0.5f });
-    m_visualParent.Children().InsertAtTop(xamlVisual);
+    visualParent.Children().InsertAtTop(xamlVisual);
 
     // Create a visual to host WV2 island.  Add it to root container visual.
     auto wv2Visual = m_compositor.CreateSpriteVisual();
     wv2Visual.Brush(m_compositor.CreateColorBrush(Colors::Yellow()));
     wv2Visual.RelativeSizeAdjustment({ 1.0f, 0.5f });
     wv2Visual.RelativeOffsetAdjustment({ 0.0f, 0.5f, 0.0f });
-    m_visualParent.Children().InsertAtTop(wv2Visual);
+    visualParent.Children().InsertAtTop(wv2Visual);
 
     // Create child Xaml island.
     winrt::make<winrt::Win32App::implementation::App>().as(m_app);
@@ -130,8 +130,8 @@ void Application::Initialize(HWND hWnd) {
     m_islandXaml.Content(CreateXamlTree());
 
     // Create child site link in parent for Xaml at one of its visuals and connect to island.
-    m_xamlSiteLink = winrt::MUCn::ChildSiteLink::Create(m_islandParent, xamlVisual);
-    m_xamlSiteLink.Connect(m_islandXaml.ContentIsland());
+    m_siteXaml = winrt::MUCn::ChildSiteLink::Create(m_islandParent, xamlVisual);
+    m_siteXaml.Connect(m_islandXaml.ContentIsland());
 
     WINRT_ASSERT(m_islandXaml.ContentIsland().Environment().AppWindowId() == windowId);
 
@@ -143,8 +143,8 @@ void Application::Initialize(HWND hWnd) {
     m_islandWv2.Content(webView);
 
     // Create child site link in parent for WebView2 at one of its visuals and connect to island.
-    m_wv2SiteLink = winrt::MUCn::ChildSiteLink::Create(m_islandParent, wv2Visual);
-    m_wv2SiteLink.Connect(m_islandWv2.ContentIsland());
+    m_siteWv2 = winrt::MUCn::ChildSiteLink::Create(m_islandParent, wv2Visual);
+    m_siteWv2.Connect(m_islandWv2.ContentIsland());
 }
 
 void Application::showPopup() {
