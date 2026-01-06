@@ -32,11 +32,13 @@
 #include <winrt/Microsoft.UI.Dispatching.h>
 #include <winrt/Microsoft.UI.Composition.h>
 #include <winrt/Microsoft.UI.Content.h>
+#include <winrt/Microsoft.UI.Input.h>
 #include <winrt/Microsoft.UI.Xaml.h>
 #include <winrt/Microsoft.UI.Xaml.Media.h>
 #include <winrt/Microsoft.UI.Xaml.Hosting.h>
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 #include <winrt/Microsoft.UI.Xaml.Controls.Primitives.h>
+#include <winrt/Microsoft.UI.Composition.Interactions.h>
 
 #include <winrt/Microsoft.UI.Interop.h>
 #include <winrt/Microsoft.UI.Dispatching.Interop.h>
@@ -47,6 +49,8 @@ namespace winrt
     namespace MUD = Microsoft::UI::Dispatching;
     namespace MUC = Microsoft::UI::Composition;
     namespace MUCn = Microsoft::UI::Content;
+    namespace MUI = Microsoft::UI::Input;
+    namespace MUCi = winrt::Microsoft::UI::Composition::Interactions;
 
     namespace Xaml = winrt::Microsoft::UI::Xaml;
     namespace Controls = winrt::Microsoft::UI::Xaml::Controls;

@@ -7,61 +7,108 @@ using winrt::MU::Colors;
 
 namespace {
 
-    winrt::Xaml::UIElement CreateXamlTree()
+    // Creates a single XAML control based on index
+    winrt::Xaml::UIElement CreateSingleControl(int index)
     {
-        // Create a Xaml container and the control that goes into it.
-        winrt::Controls::Grid container;
-        container.Background(winrt::Xaml::Media::SolidColorBrush(Colors::LightBlue()));
-        winrt::Controls::ColumnDefinition c1, c2;
-        // Use 1:3 ratio for text block:text box.
-        c1.Width(winrt::Xaml::GridLengthHelper::FromValueAndType(1.0, winrt::Xaml::GridUnitType::Star));
-        c2.Width(winrt::Xaml::GridLengthHelper::FromValueAndType(3.0, winrt::Xaml::GridUnitType::Star));
-        container.ColumnDefinitions().Append(c1);
-        container.ColumnDefinitions().Append(c2);
-        container.RowDefinitions().Append({});
-        container.RowDefinitions().Append({});
-
-        winrt::Controls::Button button;
-        button.Content(winrt::box_value(L"Popup"));
-        button.FontSize(48);
-        button.Click([](const auto&, const winrt::Xaml::RoutedEventArgs&) {
-            auto& app = Application::GetInstance();
-            if (!app.isPopupShowing())
-                app.showPopup();
-            else
-                app.dismissPopup();
-            });
-        container.SetRow(button, 0);
-        container.SetColumn(button, 1);
-
-        winrt::Controls::TextBlock textBlock;
-        textBlock.Text(L"Input");
-        textBlock.VerticalAlignment(winrt::Xaml::VerticalAlignment::Center);
-        textBlock.HorizontalAlignment(winrt::Xaml::HorizontalAlignment::Left);
-        textBlock.FontSize(48);
         const auto orange = ColorHelper::FromArgb(0xff, 0xff, 0xa5, 0x00);
-        textBlock.Foreground(winrt::Xaml::Media::SolidColorBrush(orange));
-        winrt::Xaml::Thickness controlMargin{ 10.0, 0, 10.0 };
-        textBlock.Margin(controlMargin);
-        container.SetRow(textBlock, 1);
-        container.SetColumn(textBlock, 0);
+        winrt::Xaml::Thickness margin{ 10.0, 10.0, 10.0, 10.0 };
 
-        winrt::Controls::TextBox textBox;
-        textBox.PlaceholderText(L"Go on, enter something...");
-        textBox.FontStyle(winrt::Text::FontStyle::Italic);
-        textBox.VerticalAlignment(winrt::Xaml::VerticalAlignment::Center);
-        textBox.HorizontalAlignment(winrt::Xaml::HorizontalAlignment::Stretch);
-        textBox.FontSize(48);
-        textBox.Margin(controlMargin);
-        container.SetRow(textBox, 1);
-        container.SetColumn(textBox, 1);
+        switch (index) {
+        case 0: {
+            winrt::Controls::Button button;
+            button.Content(winrt::box_value(L"Button Control"));
+            button.FontSize(32);
+            button.HorizontalAlignment(winrt::Xaml::HorizontalAlignment::Stretch);
+            button.VerticalAlignment(winrt::Xaml::VerticalAlignment::Stretch);
+            button.Margin(margin);
+            return button;
+        }
+        case 1: {
+            winrt::Controls::TextBox textBox;
+            textBox.PlaceholderText(L"TextBox - Enter text here.. .");
+            textBox.FontSize(28);
+            textBox.HorizontalAlignment(winrt::Xaml::HorizontalAlignment::Stretch);
+            textBox.VerticalAlignment(winrt::Xaml::VerticalAlignment::Center);
+            textBox.Margin(margin);
+            return textBox;
+        }
+        case 2: {
+            winrt::Controls::CheckBox checkBox;
+            checkBox.Content(winrt::box_value(L"CheckBox Control"));
+            checkBox.FontSize(28);
+            checkBox.HorizontalAlignment(winrt::Xaml::HorizontalAlignment::Center);
+            checkBox.VerticalAlignment(winrt::Xaml::VerticalAlignment::Center);
+            return checkBox;
+        }
+        case 3: {
+            winrt::Controls::ComboBox comboBox;
+            comboBox.Items().Append(winrt::box_value(L"Option 1"));
+            comboBox.Items().Append(winrt::box_value(L"Option 2"));
+            comboBox.Items().Append(winrt::box_value(L"Option 3"));
+            comboBox.Items().Append(winrt::box_value(L"Option 4"));
+            comboBox.SelectedIndex(0);
+            comboBox.FontSize(28);
+            comboBox.HorizontalAlignment(winrt::Xaml::HorizontalAlignment::Stretch);
+            comboBox.VerticalAlignment(winrt::Xaml::VerticalAlignment::Center);
+            comboBox.Margin(margin);
+            return comboBox;
+        }
+        case 4: {
+            winrt::Controls::CalendarDatePicker cal{};
+            cal.FontSize(48);
+            cal.HorizontalAlignment(winrt::Xaml::HorizontalAlignment::Stretch);
+            cal.VerticalAlignment(winrt::Xaml::VerticalAlignment::Center);
+            return cal;
+        }
+        /*{
+            winrt::Controls::Slider slider;
+            slider.Minimum(0);
+            slider.Maximum(100);
+            slider.Value(50);
+            slider.HorizontalAlignment(winrt::Xaml::HorizontalAlignment::Stretch);
+            slider.VerticalAlignment(winrt::Xaml::VerticalAlignment::Center);
+            slider.Margin(margin);
+            return slider;
+        }*/
+        case 5: {
+            winrt::Controls::ProgressRing progressRing;
+            progressRing.IsActive(true);
+            progressRing.Width(80);
+            progressRing.Height(80);
+            progressRing.HorizontalAlignment(winrt::Xaml::HorizontalAlignment::Center);
+            progressRing.VerticalAlignment(winrt::Xaml::VerticalAlignment::Center);
+            return progressRing;
+        }
+        case 6: {
+            winrt::Controls::ToggleSwitch toggleSwitch;
+            toggleSwitch.Header(winrt::box_value(L"ToggleSwitch Control"));
+            toggleSwitch.OnContent(winrt::box_value(L"On"));
+            toggleSwitch.OffContent(winrt::box_value(L"Off"));
+            toggleSwitch.HorizontalAlignment(winrt::Xaml::HorizontalAlignment::Center);
+            toggleSwitch.VerticalAlignment(winrt::Xaml::VerticalAlignment::Center);
+            return toggleSwitch;
+        }
+        default: {
+            winrt::Controls::TextBlock textBlock;
+            textBlock.Text(L"Unknown Control");
+            textBlock.FontSize(28);
+            return textBlock;
+        }
+        }
+    }
 
-        container.Children().Append(button);
-        container.Children().Append(textBlock);
-        container.Children().Append(textBox);
-        container.UpdateLayout();
-
-        return container;
+    // Background colors for each island
+    winrt::Windows::UI::Color GetIslandColor(int index) {
+        static const winrt::Windows::UI::Color colors[] = {
+            Colors::LightBlue(),
+            Colors::LightGreen(),
+            Colors::LightCoral(),
+            Colors::LightGoldenrodYellow(),
+            Colors::LightPink(),
+            Colors::LightCyan(),
+            Colors::LightSalmon()
+        };
+        return colors[index % 7];
     }
 
 } // namespace
@@ -70,40 +117,81 @@ void Application::Initialize(HWND hWnd) {
     if (m_bridge)
         throw std::runtime_error("Application is already initialized.");
 
-    // Create a root container visual.
+    const float contentHeight = GetContentHeight();
+
+    // Reserve space for vectors
+    m_xamlIslands.reserve(kIslandCount);
+    m_siteLinks.reserve(kIslandCount);
+    m_islandVisuals.reserve(kIslandCount);
+
+    // Create a root container visual (the viewport/clip area)
     winrt::MUC::ContainerVisual visualParent = m_compositor.CreateContainerVisual();
     visualParent.RelativeSizeAdjustment({ 1.0f, 1.0f });
-    // Create a sprite visual to paint root container in red.
+    visualParent.Clip(m_compositor.CreateInsetClip());  // Clip content to viewport
+
+    // Create a sprite visual to paint root container background
     auto parentFill = m_compositor.CreateSpriteVisual();
-    parentFill.Brush(m_compositor.CreateColorBrush(Colors::Red()));
+    parentFill.Brush(m_compositor.CreateColorBrush(Colors::DarkGray()));
     parentFill.RelativeSizeAdjustment({ 1.0f, 1.0f });
-    // Add sprite to container visual.
-    visualParent.Children().InsertAtTop(parentFill);
-    // Create parent island at root visual's bounds.  This visual is the root
-    // for island's visual tree.
+    visualParent.Children().InsertAtBottom(parentFill);
+
+    // Create scrollable content container - this will be moved by InteractionTracker
+    m_scrollableContent = m_compositor.CreateContainerVisual();
+    m_scrollableContent.Size({ kWindowSize.x, contentHeight });
+    visualParent.Children().InsertAtTop(m_scrollableContent);
+
+    // Create parent island at root visual's bounds
     m_islandParent = winrt::MUCn::ContentIsland::Create(visualParent);
 
-    m_islandParent.StateChanged([&](const auto&,
+    // --- SETUP INTERACTION TRACKER FOR SCROLLING ---
+    m_tracker = winrt::MUCi::InteractionTracker::CreateWithOwner(m_compositor, *this);
+
+    // Set vertical scroll boundaries
+    m_tracker.MinPosition({ 0.0f, 0.0f, 0.0f });
+    float maxScroll = contentHeight - kWindowSize.y;
+    if (maxScroll < 0) maxScroll = 0;
+    m_tracker.MaxPosition({ 0.0f, maxScroll, 0.0f });
+
+    // Create interaction source from the parent visual
+    auto interactionSource = winrt::MUCi::VisualInteractionSource::Create(visualParent);
+    interactionSource.PositionYSourceMode(winrt::MUCi::InteractionSourceMode::EnabledWithInertia);
+    interactionSource.PositionXSourceMode(winrt::MUCi::InteractionSourceMode::Disabled);
+    interactionSource.ManipulationRedirectionMode(
+        winrt::MUCi::VisualInteractionSourceRedirectionMode::CapableTouchpadAndPointerWheel);
+
+    m_tracker.InteractionSources().Add(interactionSource);
+
+    // Bind tracker position to scrollable content offset
+    auto scrollExpression = m_compositor.CreateExpressionAnimation(L"-tracker.Position.Y");
+    scrollExpression.SetReferenceParameter(L"tracker", m_tracker);
+    m_scrollableContent.StartAnimation(L"Offset.Y", scrollExpression);
+
+    // Handle resize events
+    m_islandParent.StateChanged([this, contentHeight](const auto&,
         const winrt::MUCn::ContentIslandStateChangedEventArgs& args) {
             if (args.DidActualSizeChange()) {
                 const auto islandSize = m_islandParent.ActualSize();
-                const winrt::Numerics::float2 innerIslandSize = { islandSize.x, islandSize.y * 0.5f };
-                // Setting these properties are important for the child island to show up with a
-                // non-zero size both during init and later resizes.
-                m_siteXaml.LocalToParentTransformMatrix(winrt::Numerics::float4x4::identity());
-                m_siteXaml.ActualSize(innerIslandSize);
 
-                m_siteWv2.LocalToParentTransformMatrix(
-                    winrt::Numerics::make_float4x4_translation({ 0.0f, islandSize.y * 0.5f, 0.0f }));
-                m_siteWv2.ActualSize(innerIslandSize);
+                // Update tracker max position on resize
+                float maxScroll = contentHeight - islandSize.y;
+                if (maxScroll < 0) maxScroll = 0;
+                m_tracker.MaxPosition({ 0.0f, maxScroll, 0.0f });
+
+                // Update island visual widths and site links
+                for (int i = 0; i < kIslandCount; ++i) {
+                    m_islandVisuals[i].Size({ islandSize.x - 2 * kIslandSpacing, kIslandHeight });
+
+                    if (m_siteLinks[i]) {
+                        m_siteLinks[i].ActualSize({ islandSize.x - 2 * kIslandSpacing, kIslandHeight });
+                    }
+                }
             }
         });
 
-    // Create bridge to host parent island and connect.
+    // Create bridge to host parent island
     auto windowId = winrt::Microsoft::UI::GetWindowIdFromWindow(hWnd);
     m_bridge = DesktopChildSiteBridge::Create(m_compositor, windowId);
     m_bridge.OverrideScale(1.0f);
-    // Auto-resize visual tree on WM_SIZE events.
     m_bridge.ResizePolicy(winrt::MUCn::ContentSizePolicy::ResizeContentToParentWindow);
     m_bridge.Connect(m_islandParent);
     m_bridge.MoveAndResize({ 0, 0,
@@ -111,46 +199,70 @@ void Application::Initialize(HWND hWnd) {
         static_cast<int>(kWindowSize.y) });
     m_bridge.Show();
 
-    // Create a visual to host Xaml island.  Add it to root container visual.
-    auto xamlVisual = m_compositor.CreateSpriteVisual();
-    xamlVisual.Brush(m_compositor.CreateColorBrush(Colors::Teal()));
-    xamlVisual.RelativeSizeAdjustment({ 1.0f, 0.5f });
-    visualParent.Children().InsertAtTop(xamlVisual);
+    // --- GET INPUT POINTER SOURCE FOR WHEEL HANDLING ---
+    // Get the InputPointerSource from the ContentIsland
+    m_pointerSource = winrt::MUI::InputPointerSource::GetForIsland(m_islandParent);
 
-    // Create a visual to host WV2 island.  Add it to root container visual.
-    auto wv2Visual = m_compositor.CreateSpriteVisual();
-    wv2Visual.Brush(m_compositor.CreateColorBrush(Colors::Yellow()));
-    wv2Visual.RelativeSizeAdjustment({ 1.0f, 0.5f });
-    wv2Visual.RelativeOffsetAdjustment({ 0.0f, 0.5f, 0.0f });
-    visualParent.Children().InsertAtTop(wv2Visual);
+    // Dismiss popups when clicking on empty space (light-dismiss behavior)
+    m_pointerSource.PointerPressed(
+        [this](const winrt::Microsoft::UI::Input::InputPointerSource&,
+            const winrt::Microsoft::UI::Input::PointerEventArgs&) {
+                for (auto& island : m_xamlIslands) {
+                    if (island && island.Content()) {
+                        auto xamlRoot = island.Content().XamlRoot();
+                        if (xamlRoot) {
+                            auto popups = winrt::Xaml::Media::VisualTreeHelper::GetOpenPopupsForXamlRoot(xamlRoot);
+                            for (uint32_t i = 0; i < popups.Size(); ++i) {
+                                popups.GetAt(i).IsOpen(false);
+                            }
+                        }
+                    }
+                }
+        });
 
-    // Create child Xaml island.
+    // Initialize the XAML app (only once for all islands)
     winrt::make<winrt::Win32App::implementation::App>().as(m_app);
-    m_islandXaml = winrt::Xaml::XamlIsland();
-    m_islandXaml.Content(CreateXamlTree());
 
-    // Create child site link in parent for Xaml at one of its visuals and connect to island.
-    m_siteXaml = winrt::MUCn::ChildSiteLink::Create(m_islandParent, xamlVisual);
-    m_siteXaml.Connect(m_islandXaml.ContentIsland());
+    // Create 7 XAML Islands, each with a single control
+    for (int i = 0; i < kIslandCount; ++i) {
+        // Calculate vertical position for this island
+        float yOffset = kIslandSpacing + i * (kIslandHeight + kIslandSpacing);
 
-    WINRT_ASSERT(m_islandXaml.ContentIsland().Environment().AppWindowId() == windowId);
+        // Create visual to host this island
+        auto visual = m_compositor.CreateSpriteVisual();
+        visual.Brush(m_compositor.CreateColorBrush(GetIslandColor(i)));
+        visual.Size({ kWindowSize.x - 2 * kIslandSpacing, kIslandHeight });
+        visual.Offset({ kIslandSpacing, yOffset, 0.0f });
+        m_scrollableContent.Children().InsertAtTop(visual);
+        m_islandVisuals.push_back(visual);
 
-    // Create a child WebView2 island.
-    auto webView = winrt::Controls::WebView2();
-    winrt::Windows::Foundation::Uri uri{ L"http://www.bing.com" };
-    webView.Source(uri);
-    m_islandWv2 = winrt::Xaml::XamlIsland();
-    m_islandWv2.Content(webView);
+        // Create XAML Island with a single control
+        auto xamlIsland = winrt::Xaml::XamlIsland();
+        xamlIsland.Content(CreateSingleControl(i));
+        m_xamlIslands.push_back(xamlIsland);
 
-    // Create child site link in parent for WebView2 at one of its visuals and connect to island.
-    m_siteWv2 = winrt::MUCn::ChildSiteLink::Create(m_islandParent, wv2Visual);
-    m_siteWv2.Connect(m_islandWv2.ContentIsland());
+        // Create child site link and connect to island
+        auto siteLink = winrt::MUCn::ChildSiteLink::Create(m_islandParent, visual);
+        siteLink.ActualSize({ kWindowSize.x - 2 * kIslandSpacing, kIslandHeight });
+
+        // Connect island to link
+        siteLink.Connect(xamlIsland.ContentIsland());
+        m_siteLinks.push_back(siteLink);
+    }
+}
+
+void Application::ValuesChanged(
+    winrt::Microsoft::UI::Composition::Interactions::InteractionTracker const&,
+    winrt::Microsoft::UI::Composition::Interactions::InteractionTrackerValuesChangedArgs const&)
+{
+    // Optional: Handle scroll position changes if needed
+    // e.g., for lazy loading, visibility culling, etc.
 }
 
 void Application::showPopup() {
     assert(m_bridge);
     if (m_bridgePopup) {
-        OutputDebugStringA("showPopup: Ignoring request as popup already showing up.");
+        OutputDebugStringA("showPopup:  Ignoring request as popup already showing up.");
         return;
     }
     auto fill = m_compositor.CreateSpriteVisual();
@@ -160,25 +272,20 @@ void Application::showPopup() {
     m_bridgePopup = winrt::MUCn::DesktopPopupSiteBridge::Create(m_islandParent);
     m_bridgePopup.Connect(popupIsland);
 
-#ifndef POPUP_PARENT_IS_WEBVIEW
     const auto parentView = m_bridge.SiteView();
-#else
-    const auto parentView = m_wv2SiteLink.SiteView();
-#endif // POPUP_PARENT_IS_WEBVIEW
     const auto parentSize = parentView.ActualSize();
     const auto convertor = parentView.CoordinateConverter();
     m_bridgePopup.MoveAndResize(convertor.ConvertLocalToScreen({
-        parentSize.x * 0.25f,  // Offset
+        parentSize.x * 0.25f,
         parentSize.y * 0.25f,
-        parentSize.x * 0.5f,   // Size
+        parentSize.x * 0.5f,
         parentSize.y * 0.5f
-    }));
+        }));
     m_bridgePopup.Show();
 }
 
 void Application::dismissPopup() {
     if (m_bridgePopup && m_bridgePopup.IsVisible()) {
-        // Hide and close as close doesn't call hide and we continue to see a popup!
         m_bridgePopup.Hide();
         m_bridgePopup.Close();
         m_bridgePopup = nullptr;
