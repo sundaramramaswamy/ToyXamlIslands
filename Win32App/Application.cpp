@@ -245,6 +245,13 @@ void Application::Initialize(HWND hWnd) {
         auto siteLink = winrt::MUCn::ChildSiteLink::Create(m_islandParent, visual);
         siteLink.ActualSize({ kWindowSize.x - 2 * kIslandSpacing, kIslandHeight });
 
+        // Set initial transform (scroll offset is 0 at startup)
+        siteLink.LocalToParentTransformMatrix(
+            winrt::Numerics::make_float4x4_translation(
+                kIslandSpacing,
+                yOffset,
+                0.0f));
+
         // Connect island to link
         siteLink.Connect(xamlIsland.ContentIsland());
         m_siteLinks.push_back(siteLink);
