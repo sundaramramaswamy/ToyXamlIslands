@@ -268,6 +268,19 @@ void Application::ValuesChanged(
     // Wrap below in this if compositor and UI run on different threads.
     // m_islandParent.DispatcherQueue().TryEnqueue([this, position = args.Position()]() {
 
+    // Dismiss any open popups when scrolling occurs
+    for (auto& island : m_xamlIslands) {
+        if (island && island.Content()) {
+            auto xamlRoot = island.Content().XamlRoot();
+            if (xamlRoot) {
+                auto popups = winrt::Xaml::Media::VisualTreeHelper::GetOpenPopupsForXamlRoot(xamlRoot);
+                for (uint32_t i = 0; i < popups.Size(); ++i) {
+                    popups.GetAt(i).IsOpen(false);
+                }
+            }
+        }
+    }
+
     // Also update ChildSiteLink transforms for correct popup positioning
     float scrollOffset = m_tracker.Position().y;
     for (size_t i = 0; i < m_siteLinks.size(); ++i) {
