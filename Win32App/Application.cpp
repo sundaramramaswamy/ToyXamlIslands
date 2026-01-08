@@ -264,6 +264,24 @@ void Application::ValuesChanged(
 {
     // Optional: Handle scroll position changes if needed
     // e.g., for lazy loading, visibility culling, etc.
+
+    // Wrap below in this if compositor and UI run on different threads.
+    // m_islandParent.DispatcherQueue().TryEnqueue([this, position = args.Position()]() {
+
+    // Also update ChildSiteLink transforms for correct popup positioning
+    float scrollOffset = m_tracker.Position().y;
+    for (size_t i = 0; i < m_siteLinks.size(); ++i) {
+        if (m_siteLinks[i]) {
+            float yOffset = kIslandSpacing + static_cast<float>(i) * (kIslandHeight + kIslandSpacing);
+            m_siteLinks[i].LocalToParentTransformMatrix(
+                winrt::Numerics::make_float4x4_translation(
+                    kIslandSpacing,
+                    yOffset - scrollOffset,
+                    0.0f));
+        }
+    }
+
+    // });
 }
 
 void Application::showPopup() {
